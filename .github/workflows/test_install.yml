@@ -26,7 +26,7 @@ jobs:
         sudo ./install_arduino.sh
 
   ros2-install:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         type: [mirte, mirte-master]
@@ -40,8 +40,12 @@ jobs:
         sudo mkdir -p $MIRTE_SRC_DIR
         sudo mkdir $MIRTE_SRC_DIR/mirte-install-scripts/
         sudo cp -r ./* $MIRTE_SRC_DIR/mirte-install-scripts/
+        ROS_PACKAGE_START_LINE_NR=$(grep "mirte-ros-packages:" repos.yaml -n -h | cut -d: -f1 -)
+        ROS_PACKAGE_SED_INFO="$ROS_PACKAGE_START_LINE_NR,$((ROS_PACKAGE_START_LINE_NR + 4))p;$((ROS_PACKAGE_START_LINE_NR + 5))q"
+        ROS_PACKAGE_REPO=$(sed -n $ROS_PACKAGE_SED_INFO repos.yaml | tr -d ' ' | grep "url:" | sed -e "s/^url://")
+        ROS_PACKAGE_BRANCH=$(sed -n $ROS_PACKAGE_SED_INFO repos.yaml | tr -d ' ' | grep "version:" | sed -e "s/^version://")
         cd $MIRTE_SRC_DIR
-        sudo git clone https://github.com/arendjan/mirte-ros-packages.git mirte-ros-packages -b develop --recursive
+        sudo git clone $ROS_PACKAGE_REPO mirte-ros-packages -b $ROS_PACKAGE_BRANCH --recursive
 
         sudo apt update
         cd $MIRTE_SRC_DIR/mirte-install-scripts/
