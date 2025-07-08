@@ -49,6 +49,18 @@ sudo pip3 install pyzbar mergedeep
 #rm $MIRTE_SRC_DIR/mirte-ros-packages/mirte_telemetrix/config/mirte_user_settings.yaml
 #ln -s /home/mirte/.user_settings.yaml $MIRTE_SRC_DIR/mirte-ros-packages/config/mirte_user_settings.yaml
 
+# Some nice extra COLCON packages:
+# clean: can clean workspaces and packages. No need to do it by hand.
+# mixin: Allows the use of predefined sets of commandline arguments called mixins.
+# lint: can check for errors in the cmake/package code.
+# top-level-workspace: Built from any folder, finds the workspace root. (Installed later)
+sudo apt install python3-colcon-clean python3-colcon-mixin -y
+sudo pip3 install colcon-lint
+
+# Setup MIXINs
+colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
+colcon mixin update default
+
 # TODO: install in a separate workspace or install the debs.
 # Install Mirte ROS package
 mkdir -p /home/mirte/mirte_ws/src
@@ -65,7 +77,7 @@ github_url=$(git config --get remote.origin.url | sed 's/\.git$//')
 fallback=true
 cd /home/mirte/mirte_ws/ || exit 1
 vcs import src <$MIRTE_SRC_DIR/mirte-ros-packages/sources.repos || true
-if [[ $branch == "develop" || $branch == "main" ]]; then
+if [[ $branch == "develop" || $branch == "main" || $branch == "develop-$ROS_NAME" ]]; then
 	fallback=false
 
 	# Install mirte ros packages with apt from github, since they take ages to compile and it's easier to update them.
@@ -73,7 +85,7 @@ if [[ $branch == "develop" || $branch == "main" ]]; then
 
 	echo "Using precompiled version of packages"
 	cd /home/mirte/mirte_ws/src/ || exit 1
-	ignore=(mirte_telemetrix_cpp mirte_msgs mirte_teleop astra_camera astra_camera_msgs libuvc mirte_base_control mirte_master_arm_control mirte_control usb_cam)
+	ignore=(mirte_telemetrix_cpp mirte_msgs mirte_teleop astra_camera astra_camera_msgs libuvc mirte_base_control mirte_master_arm_control mirte_control usb_cam mirte_modular_hardware)
 	packages=''
 	for i in "${ignore[@]}"; do
 		path=$(colcon list --packages-select $i -p)
@@ -92,7 +104,7 @@ if [[ $branch == "develop" || $branch == "main" ]]; then
 		i_dash=$(echo $i | tr '_' '-')
 		packages="$packages ros-$ROS_NAME-$i_dash"
 	done
-	if [[ $branch == "develop" ]]; then
+	if [[ $branch == "develop" || $branch == "develop-$ROS_NAME" ]]; then
 		arch="${arch}_develop"
 	fi
 	echo "deb [trusted=yes] $github_url/raw/ros_mirte_${ROS_NAME}_${ubuntu_version}_${arch}/ ./" | sudo tee /etc/apt/sources.list.d/mirte-ros-packages.list
@@ -115,7 +127,7 @@ cd /home/mirte/mirte_ws/src || exit 1
 # git clone https://github.com/RobotWebTools/web_video_server.git -b ros2
 cd .. || exit 1
 rosdep install -y --from-paths src/ --ignore-src --rosdistro $ROS_NAME
-colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+colcon build --symlink-install --mixin release
 add_mirte_settings "export MIRTE_ZENOH=false"          # disable zenoh by default, but can be enabled by setting to true
 add_mirte_settings "export MIRTE_USE_MULTIROBOT=false" # TODO: use this in the launch file?
 add_mirte_settings "export ROS_LOG_DIR=/tmp/ros"
@@ -148,9 +160,6 @@ sudo systemctl enable mirte-ros
 sudo usermod -a -G video mirte
 sudo adduser mirte dialout
 
-# Some nice extra packages: clean can clean workspaces and packages. No need to do it by hand. lint can check for errors in the cmake/package code.
-sudo pip3 install colcon-clean colcon-lint
-
 # Add colcon top level workspace, this makes it possible to run colcon build from any folder, it will find the workspace and build it. Otherwise it will create a new workspace in the subdirectory.
 
 if [[ $MIRTE_TYPE == "mirte-master" ]]; then
@@ -159,6 +168,7 @@ if [[ $MIRTE_TYPE == "mirte-master" ]]; then
 
 	# install lidar and depth camera
 	cd /home/mirte/mirte_ws/src || exit 1
+	# FUTURE-NOTE: Watch out as of 2025-07-08 the rosdistro version for Jazzy and up references an old fork.
 	git clone https://github.com/Slamtec/rplidar_ros.git -b ros2 # FIXME-FUTURE: Can be installed in newer versions if V2.1.5 is released
 
 	# git clone https://github.com/ArendJan/ros2_astra_camera.git -b fix-ros-jammy      # compressed images image transport fixes, fork of orbbec/... with also lazy nodes
@@ -178,7 +188,7 @@ if [[ $MIRTE_TYPE == "mirte-master" ]]; then
 	# sudo rm -rf temp
 	cd /home/mirte/mirte_ws/ || exit 1
 	rosdep install -y --from-paths src/ --ignore-src --rosdistro $ROS_NAME
-	colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+	colcon build --symlink-install --mixin release
 	# shellcheck source=/dev/null
 	source ./install/setup.bash
 	cd src/ros2_astra_camera/astra_camera
@@ -202,10 +212,10 @@ rm -rf colcon-top-level-workspace
 # TODO: check for ROS2 jazzy
 cat <<EOF >>/home/mirte/.zshrc
 sr () { # macro to source the workspace and enable autocompletion. sr stands for source ros, no other command should use this abbreviation.
-    . /opt/ros/humble/setup.zsh
+    # . /opt/ros/$ROS_NAME/setup.zsh
     . ~/mirte_ws/install/setup.zsh
-    eval "\$(register-python-argcomplete3 ros2)"
-    eval "\$(register-python-argcomplete3 colcon)"
+    eval "\$(register-python-argcomplete ros2)"
+    eval "\$(register-python-argcomplete colcon)"
 }
 cb () {
     pkg=\$1
@@ -220,9 +230,9 @@ cbr () {
     pkg=\$1
     # if package not empty
     if [ -n "\$pkg" ]; then
-        colcon build --symlink-install --packages-up-to \$pkg --cmake-args -DCMAKE_BUILD_TYPE=Release
+        colcon build --symlink-install --packages-up-to \$pkg --mixin release
     else
-        colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+        colcon build --symlink-install --mixin release
     fi
 }
 sr

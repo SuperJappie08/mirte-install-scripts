@@ -35,11 +35,12 @@ sudo groupadd gpiod
 sudo usermod -a -G gpiod mirte
 sudo echo '# udev rules for gpio port access through libgpiod
 SUBSYSTEM=="gpio", KERNEL=="gpiochip*", GROUP="gpiod", MODE="0660"' | sudo tee /etc/udev/rules.d/60-gpiod.rules
-pip install gpiod==1.5.4 # python3.8 version
+# FIXME:(SuperJappie08): Is this neccessary? # pip install gpiod==1.5.4 # python3.8 version
 
-# chatgpt node stuff for @chris-pek
-pip install gtts playsound openai==0.28.0 sounddevice scipy SpeechRecognition soundfile transformers datasets pyyaml pydub Elevenlabs || true # some strange package versions
-pip install numpy==1.23.1                                                                                                                     # python3.8 fix
+# FIXME:(SuperJappie08): Is this neccessary?
+# # chatgpt node stuff for @chris-pek
+# pip install gtts playsound openai==0.28.0 sounddevice scipy SpeechRecognition soundfile transformers datasets pyyaml pydub Elevenlabs || true # some strange package versions
+# pip install numpy==1.23.1                                                                                                                     # python3.8 fix
 
 # mkdir ~/uboot_fix/
 # cd ~/uboot_fix/
@@ -54,7 +55,9 @@ pip install numpy==1.23.1                                                       
 
 # cd ~/mirte_ws/src
 # git clone --recurse-submodules https://github.com/arendjan/mirte-telemetrix-cpp.git
-cd ~/mirte_ws
-source /opt/ros/humble/setup.bash
-rosdep install -y --from-paths src/ --ignore-src --rosdistro humble
-colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+# FIXME:(SuperJappie08): Is this neccessary?
+# cd ~/mirte_ws
+# source /opt/ros/humble/setup.bash
+# rosdep install -y --from-paths src/ --ignore-src --rosdistro humble
+# colcon build --symlink-install --mixin release

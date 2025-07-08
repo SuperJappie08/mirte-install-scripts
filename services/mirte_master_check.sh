@@ -1,7 +1,8 @@
 #!/bin/bash
 set -x
 . /home/mirte/.mirte_settings.sh
-. /opt/ros/humble/setup.bash
+# NOTE:(SuperJappie08): Only source install/setup, since this will source the underlay as well
+# . /opt/ros/jazzy/setup.bash
 . /home/mirte/mirte_ws/install/setup.bash
 SECONDS=0
 LAST_SECONDS=0

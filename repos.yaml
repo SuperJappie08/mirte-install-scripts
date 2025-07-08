@@ -9,12 +9,12 @@ repositories:
     version: develop
   mirte-install-scripts:
     type: git
-    url: https://github.com/mirte-robot/mirte-install-scripts.git
-    version: develop
+    url: https://github.com/SuperJappie08/mirte-install-scripts.git
+    version: develop-jazzy
   mirte-ros-packages:
     type: git
-    url: https://github.com/mirte-robot/mirte-ros-packages.git
-    version: develop
+    url: https://github.com/SuperJappie08/mirte-ros-packages.git
+    version: develop-jazzy
     recursive: true
   mirte-gazebo:
     type: git
