@@ -59,7 +59,7 @@ if [[ "$INSTALL_JUPYTER" = true ]]; then
 fi
 
 # Install numpy
-pip3 install numpy
+sudo apt install python3-numpy
 
 # Install bluetooth
 #cd $MIRTE_SRC_DIR/mirte-install-scripts || exit 1
@@ -101,7 +101,7 @@ fi
 
 # install audio support to use with mirte-pioneer pcb and orange pi zero 2
 sudo apt install pulseaudio libasound2-dev libespeak1 -y
-pip3 install simpleaudio pyttsx3 || true # simpleaudio uses an old python install system. TODO: replace or update
+sudo pip install simpleaudio pyttsx3 --break-system-packages || true # simpleaudio uses an old python install system. TODO: replace or update
 
 # Install overlayfs and make sd card read only (software)
 sudo apt install -y overlayroot
