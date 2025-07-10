@@ -11,7 +11,8 @@ sudo apt install -y python3-pip python3-setuptools python3-wheel
 pipx install nodeenv # Could be installed from apt, but version is really old.
 
 # Install nodeenv
-nodeenv --node=18.0.0 $MIRTE_SRC_DIR/mirte-web-interface/node_env
+# NOTE(SuperJappie08): The path is added to the path, but it isn't loaded yet.
+PATH=$PATH:/home/mirte/.local/bin nodeenv --node=18.0.0 $MIRTE_SRC_DIR/mirte-web-interface/node_env
 
 # Install web interface
 . $MIRTE_SRC_DIR/mirte-web-interface/node_env/bin/activate
