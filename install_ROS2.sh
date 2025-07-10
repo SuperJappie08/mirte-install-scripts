@@ -83,7 +83,7 @@ cd /home/mirte/mirte_ws/ || exit 1
 vcs import src <$MIRTE_SRC_DIR/mirte-ros-packages/sources.repos || true
 
 if [[ $MIRTE_TYPE == "mirte-master" ]]; then
-	if [[ -f $MIRTE_SRC_DIR/mirte-ros-packages/master-sources.repo ]]; then
+	if [[ -f $MIRTE_SRC_DIR/mirte-ros-packages/master-sources.repos ]]; then
 		vcs import src <$MIRTE_SRC_DIR/mirte-ros-packages/master-sources.repos || true
 
 		if [[ -d src/ros2_astra_camera/.git ]]; then

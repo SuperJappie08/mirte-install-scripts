@@ -43,7 +43,7 @@ cd $MIRTE_SRC_DIR/mirte-install-scripts
 # Install Mirte Python package
 if [[ "$INSTALL_PYTHON" = true ]]; then
 	cd $MIRTE_SRC_DIR/mirte-python
-	pip3 install .
+	sudo pip3 install . --break-system-packages
 fi
 
 # Install Mirte Interface

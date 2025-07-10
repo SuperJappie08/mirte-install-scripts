@@ -7,7 +7,8 @@ sudo apt update || true
 
 # Install nodeenv
 sudo apt install -y python3-pip python3-setuptools python3-wheel
-sudo -H pip install nodeenv
+# sudo -H pip install nodeenv
+pipx install nodeenv # Could be installed from apt, but version is really old.
 
 # Install nodeenv
 nodeenv --node=18.0.0 $MIRTE_SRC_DIR/mirte-web-interface/node_env
@@ -27,8 +28,9 @@ npm install .
 
 cd $MIRTE_SRC_DIR/mirte-web-interface
 git clone https://github.com/dheera/rosboard.git
-sudo pip3 install tornado
-sudo pip3 install simplejpeg # recommended, but ROSboard can fall back to cv2 or PIL instead
+sudo apt install python3-tornado
+sudo apt install python3-numpy                      # Fist install simplejpeg dependencies
+sudo pip install simplejpeg --break-system-packages # recommended, but ROSboard can fall back to cv2 or PIL instead
 
 # Install wetty
 #cd $MIRTE_SRC_DIR/mirte-web-interface
