@@ -53,7 +53,7 @@ sudo apt install -y python3-pip python3-wheel python3-setuptools python3-opencv 
 # clean: can clean workspaces and packages. No need to do it by hand.
 # mixin: Allows the use of predefined sets of commandline arguments called mixins.
 # lint: can check for errors in the cmake/package code.
-# top-level-workspace: Built from any folder, finds the workspace root. (Installed later)
+# top-level-workspace: Built from any folder, finds the workspace root. Otherwise it will create a new workspace in the subdirectory.
 sudo apt install -y python3-colcon-clean python3-colcon-mixin
 sudo apt install -y apt-rdepends
 # NOTE(SuperJappie08): This is fine, since all dependencies are already installed. (and it is a 'leaf'-dependency)
@@ -81,6 +81,21 @@ github_url=$(git config --get remote.origin.url | sed 's/\.git$//')
 fallback=true
 cd /home/mirte/mirte_ws/ || exit 1
 vcs import src <$MIRTE_SRC_DIR/mirte-ros-packages/sources.repos || true
+
+if [[ $MIRTE_TYPE == "mirte-master" ]]; then
+	if [[ -f $MIRTE_SRC_DIR/mirte-ros-packages/master-sources.repo ]]; then
+		vcs import src <$MIRTE_SRC_DIR/mirte-ros-packages/master-sources.repos || true
+
+		if [[ -d src/ros2_astra_camera/.git ]]; then
+			cd src/ros2_astra_camera
+			# Astra naming
+			astra_arch=$(dpkg --print-architecture)
+			astra_github_url=$(git config --get remote.origin.url | sed 's/\.git$//')
+			cd -
+		fi
+	fi
+fi
+
 if [[ $branch == "develop" || $branch == "main" || $branch == "develop-$ROS_NAME" ]]; then
 	fallback=false
 
@@ -113,6 +128,12 @@ if [[ $branch == "develop" || $branch == "main" || $branch == "develop-$ROS_NAME
 	fi
 	echo "deb [trusted=yes] $github_url/raw/ros_mirte_${ROS_NAME}_${ubuntu_version}_${arch}/ ./" | sudo tee /etc/apt/sources.list.d/mirte-ros-packages.list
 	echo "yaml $github_url/raw/ros_mirte_${ROS_NAME}_${ubuntu_version}_${arch}/local.yaml ${ROS_NAME}" | sudo tee /etc/ros/rosdep/sources.list.d/mirte-ros-packages.list
+
+	if [[ $MIRTE_TYPE = "mirte-master" ]] && [[ -d ros2_astra_camera ]]; then
+		echo "deb [trusted=yes] $astra_github_url/raw/ros_${ROS_NAME}_${ubuntu_version}_${astra_arch}/ ./" | sudo tee /etc/apt/sources.list.d/ArendJan_ros2_astra_camera.list
+		echo "yaml $astra_github_url/raw/ros_${ROS_NAME}_${ubuntu_version}_${astra_arch}/local.yaml ${ROS_NAME}" | sudo tee /etc/ros/rosdep/sources.list.d/1-ArendJan_ros2_astra_camera.list
+	fi
+
 	sudo apt update
 	sudo apt install -y -m $packages || fallback=false # TODO: disabled fallback for now as mirte-arm doesn't compile.
 fi
@@ -164,8 +185,6 @@ sudo systemctl enable mirte-ros
 sudo usermod -a -G video mirte
 sudo adduser mirte dialout
 
-# Add colcon top level workspace, this makes it possible to run colcon build from any folder, it will find the workspace and build it. Otherwise it will create a new workspace in the subdirectory.
-
 if [[ $MIRTE_TYPE == "mirte-master" ]]; then
 	# TODO: need to check and edit the next part:
 	sudo apt install ros-$ROS_NAME-slam-toolbox -y
@@ -190,6 +209,7 @@ if [[ $MIRTE_TYPE == "mirte-master" ]]; then
 	# sudo ldconfig
 	# cd ../../../
 	# sudo rm -rf temp
+
 	cd /home/mirte/mirte_ws/ || exit 1
 	rosdep install -y --from-paths src/ --ignore-src --rosdistro $ROS_NAME
 	colcon build --symlink-install --mixin release
