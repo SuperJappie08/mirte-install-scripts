@@ -10,7 +10,9 @@ sudo bash -c 'echo "nameserver 8.8.8.8" > /etc/resolv.conf'
 
 # Make sure there are no conflicting hcdp-servers
 sudo apt install -y dnsmasq-base
-systemctl disable hostapd
+if [[ $(systemctl is-enabled hostadp >/dev/null) ]]; then
+	systemctl disable hostapd
+fi
 # sed -i 's/#DNSStubListener=yes/DNSStubListener=no/g' /etc/systemd/resolved.conf # TODO: check this
 
 # Install netplan (not installed on armbian) and networmanager (not installed by Raspberry)
