@@ -42,8 +42,7 @@ rosdep update
 
 # Install computer vision libraries
 #TODO: make dependecies of ROS package
-sudo apt install -y python3-pip python3-wheel python3-setuptools python3-opencv libzbar0
-sudo pip3 install pyzbar mergedeep
+sudo apt install -y python3-pip python3-wheel python3-setuptools python3-opencv libzbar0 python3-pyzbar python3-mergedeep
 
 # TODO: move configs to mirte bringup
 #cp $MIRTE_SRC_DIR/mirte-ros-packages/mirte_telemetrix/config/mirte_user_settings.yaml /home/mirte/.user_settings.yaml
@@ -55,8 +54,12 @@ sudo pip3 install pyzbar mergedeep
 # mixin: Allows the use of predefined sets of commandline arguments called mixins.
 # lint: can check for errors in the cmake/package code.
 # top-level-workspace: Built from any folder, finds the workspace root. (Installed later)
-sudo apt install python3-colcon-clean python3-colcon-mixin -y
-sudo pip3 install colcon-lint
+sudo apt install -y python3-colcon-clean python3-colcon-mixin
+sudo apt install -y apt-rdepends
+# NOTE(SuperJappie08): This is fine, since all dependencies are already installed. (and it is a 'leaf'-dependency)
+# It must be installed like this, since colcon otherwise cannot find it.
+sudo pip install colcon-lint --break-system-packages
+sudo pip install git+https://github.com/rhaschke/colcon-top-level-workspace --break-system-packages
 
 # Setup MIXINs
 colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml
@@ -203,11 +206,7 @@ if [[ $MIRTE_TYPE == "mirte-master" ]]; then
 fi
 
 cd /tmp
-git clone https://github.com/rhaschke/colcon-top-level-workspace
-cd colcon-top-level-workspace
-pip install .
-cd ..
-rm -rf colcon-top-level-workspace
+
 # zsh does not work nicely with ros2 autocomplete, so we need to add a function to fix it.
 # ROS 2 Foxy should have this fixed, but we are using ROS 2 Humble.
 # TODO: check for ROS2 jazzy
