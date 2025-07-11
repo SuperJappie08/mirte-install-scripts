@@ -68,6 +68,7 @@ colcon mixin update default
 # TODO: install in a separate workspace or install the debs.
 # Install Mirte ROS package
 mkdir -p /home/mirte/mirte_ws/src
+touch /home/mirte/mirte_ws/.colcon_root # Explicitly add marker file
 cd /home/mirte/mirte_ws/src
 ln -s $MIRTE_SRC_DIR/mirte-ros-packages .
 
@@ -162,14 +163,14 @@ add_rc "# Enable Zenoh and multirobot in .mirte_settings.sh"
 add_rc "source /home/mirte/mirte_ws/install/setup.bash" "# sourced later on"
 
 # By default the ROS communication should only be localhost.
-add_mirte_settings "export ROS_LOCALHOST_ONLY=1"
+add_mirte_settings "export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST"
 
 # shellcheck source=/dev/null
 source /home/mirte/mirte_ws/install/setup.bash
 
 # Add systemd service to start ROS nodes
 if [[ $MIRTE_TYPE == "mirte-master" ]]; then # master version should start a different launch file
-	add_mirte_settings "export ROS_LOCALHOST_ONLY=0"
+	add_mirte_settings "export ROS_AUTOMATIC_DISCOVERY_RANGE=SUBNET"
 	# rename the service file to the correct name, otherwise systemctl will error with a "Failed to look up unit file state: Link has been severed" error
 	mv $MIRTE_SRC_DIR/mirte-install-scripts/services/mirte-ros.service $MIRTE_SRC_DIR/mirte-install-scripts/services/mirte-ros-pioneer.service
 	mv $MIRTE_SRC_DIR/mirte-install-scripts/services/mirte-master-ros.service $MIRTE_SRC_DIR/mirte-install-scripts/services/mirte-ros.service
