@@ -104,7 +104,7 @@ if [[ $branch == "develop" || $branch == "main" || $branch == "develop-$ROS_NAME
 	# colcon ignore those packages
 
 	echo "Using precompiled version of packages"
-	cd /home/mirte/mirte_ws/src/ || exit 1
+	cd /home/mirte/mirte_ws/ || exit 1
 	ignore=(mirte_telemetrix_cpp mirte_msgs mirte_teleop astra_camera astra_camera_msgs libuvc mirte_base_control mirte_master_arm_control mirte_control usb_cam mirte_modular_hardware)
 	packages=''
 	for i in "${ignore[@]}"; do
