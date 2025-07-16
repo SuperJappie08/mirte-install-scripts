@@ -130,7 +130,7 @@ if [[ $branch == "develop" || $branch == "main" || $branch == "develop-$ROS_NAME
 	echo "deb [trusted=yes] $github_url/raw/ros_mirte_${ROS_NAME}_${ubuntu_version}_${arch}/ ./" | sudo tee /etc/apt/sources.list.d/mirte-ros-packages.list
 	echo "yaml $github_url/raw/ros_mirte_${ROS_NAME}_${ubuntu_version}_${arch}/local.yaml ${ROS_NAME}" | sudo tee /etc/ros/rosdep/sources.list.d/mirte-ros-packages.list
 
-	if [[ $MIRTE_TYPE = "mirte-master" ]] && [[ -d ros2_astra_camera ]]; then
+	if [[ $MIRTE_TYPE = "mirte-master" ]] && [[ -d src/ros2_astra_camera ]]; then
 		echo "deb [trusted=yes] $astra_github_url/raw/ros_${ROS_NAME}_${ubuntu_version}_${astra_arch}/ ./" | sudo tee /etc/apt/sources.list.d/ArendJan_ros2_astra_camera.list
 		echo "yaml $astra_github_url/raw/ros_${ROS_NAME}_${ubuntu_version}_${astra_arch}/local.yaml ${ROS_NAME}" | sudo tee /etc/ros/rosdep/sources.list.d/1-ArendJan_ros2_astra_camera.list
 	fi
